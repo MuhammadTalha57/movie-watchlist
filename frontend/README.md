@@ -69,9 +69,10 @@ Movie endpoints (Bearer token required):
 2. In Vercel, click **Add New Project** and import this repo.
 3. Set **Root Directory** to `frontend`.
 4. Framework Preset: **Vite**.
-5. Add environment variable in Vercel:
-    - `VITE_API_URL` = your deployed backend URL
+5. Deploy backend first from the same repo with **Root Directory** set to `backend`.
+6. Add environment variable in frontend Vercel project:
+    - `VITE_API_URL` = your deployed backend Vercel URL
 
-6. Deploy.
+7. Deploy frontend.
 
 After deploy, frontend will call your backend via `VITE_API_URL`.

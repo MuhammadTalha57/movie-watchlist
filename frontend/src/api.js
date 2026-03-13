@@ -1,4 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const envApiUrl = import.meta.env.VITE_API_URL?.trim();
+const normalizedEnvUrl = envApiUrl ? envApiUrl.replace(/\/+$/, "") : "";
+
+const API_BASE_URL =
+    normalizedEnvUrl || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 const buildHeaders = (token, hasJsonBody = true) => {
     const headers = {};
@@ -15,6 +19,10 @@ const buildHeaders = (token, hasJsonBody = true) => {
 };
 
 export const apiRequest = async (path, options = {}, token) => {
+    if (!API_BASE_URL) {
+        throw new Error("VITE_API_URL is missing in production environment");
+    }
+
     const hasBody = options.body !== undefined;
     const response = await fetch(`${API_BASE_URL}${path}`, {
         ...options,

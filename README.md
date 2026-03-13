@@ -74,27 +74,42 @@ Movies (requires `Authorization: Bearer <token>`):
 - `PUT /movies/:id`
 - `DELETE /movies/:id`
 
-## Deploy on Vercel
+## Deploy on Vercel (Frontend + Backend)
 
-Vercel is best used here for the frontend. For backend, you can either deploy to another Node host (recommended quick path) or refactor backend for Vercel serverless functions.
+This repo is now ready for Vercel deployment on both sides.
 
-### Option A (Recommended): Frontend on Vercel + Backend on Render/Railway
+### 1. Deploy Backend Project on Vercel
 
-1. Deploy backend to Render or Railway.
-2. Deploy frontend to Vercel with root directory `frontend`.
-3. In Vercel project settings, set:
-    - `VITE_API_URL=https://your-backend-domain.com`
+1. Push repository to GitHub.
+2. In Vercel, create a new project from this repo.
+3. Set **Root Directory** to `backend`.
+4. Keep framework as **Other**.
+5. Add backend environment variables in Vercel Project Settings:
+    - `DATABASE_URL` = your MongoDB Atlas SRV URL
+    - `JWT_SECRET` = strong random secret
+    - `DNS_SERVERS` = `8.8.8.8,1.1.1.1`
+6. Deploy.
 
-4. Redeploy frontend.
+Backend uses `backend/vercel.json` and serverless entrypoint `backend/api/index.js`.
 
-### Option B: Deploy Both to Vercel
+### 2. Deploy Frontend Project on Vercel
 
-To deploy backend on Vercel, Express app should be adapted to Vercel Functions (serverless entrypoint and routing config). Current backend is a long-running server (`app.listen`) designed for Node server hosting.
+1. Create another Vercel project from the same repo.
+2. Set **Root Directory** to `frontend`.
+3. Framework Preset: **Vite**.
+4. Add env variable:
+    - `VITE_API_URL` = your deployed backend URL (for example `https://movie-watchlist-api.vercel.app`)
+5. Deploy.
 
-If you want, I can prepare the backend for Vercel serverless deployment in the next step.
+### 3. Atlas Settings for Production
+
+1. In MongoDB Atlas Network Access, allow Vercel access:
+    - Quick test: `0.0.0.0/0`
+    - Better: restrict to required IP ranges when possible
+2. Ensure Atlas database user credentials in `DATABASE_URL` are correct.
 
 ## Common Issues
 
-- `querySrv ECONNREFUSED` on Atlas: local Node DNS SRV lookup issue. Set `DNS_SERVERS=8.8.8.8,1.1.1.1`.
+- `querySrv ECONNREFUSED` on Atlas: Node DNS SRV resolver issue. Set `DNS_SERVERS=8.8.8.8,1.1.1.1`.
 - Atlas connection refused: add your public IP in Atlas Network Access.
 - Auth errors: verify `JWT_SECRET` exists in backend `.env`.
