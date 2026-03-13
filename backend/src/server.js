@@ -1,4 +1,5 @@
 import "dotenv/config";
+import dns from "node:dns";
 import mongoose from "mongoose";
 import app from "./app.js";
 
@@ -9,6 +10,15 @@ const MAX_RETRIES = 5;
 async function startServer() {
     if (!DATABASE_URL) {
         throw new Error("DATABASE_URL is missing in .env");
+    }
+
+    if (DATABASE_URL.startsWith("mongodb+srv://")) {
+        const dnsServers = process.env.DNS_SERVERS?.split(",") || [
+            "8.8.8.8",
+            "1.1.1.1",
+        ];
+        dns.setServers(dnsServers.map((server) => server.trim()));
+        console.log(`Using DNS servers: ${dns.getServers().join(", ")}`);
     }
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
