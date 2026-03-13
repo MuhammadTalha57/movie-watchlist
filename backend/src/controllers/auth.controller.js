@@ -4,6 +4,7 @@ import {
 } from "../services/auth.service.js";
 
 export const registerUser = async (req, res) => {
+    console.log(req.body);
     const user = await registerUserService(req.body);
 
     if (user) {
