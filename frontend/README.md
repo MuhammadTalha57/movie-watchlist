@@ -1,16 +1,77 @@
-# React + Vite
+# Movie Watchlist Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern React + Vite frontend for Movie Watchlist.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Light and dark mode toggle
+- Authentication UI (signup/login)
+- Protected movie dashboard after login
+- Movie CRUD (create, update, delete, list)
+- Movie cards in responsive grid
+- Movie details modal when card is clicked
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- Vite
+- Native Fetch API
 
-## Expanding the ESLint configuration
+## Environment Variables
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Create a `.env` file in `frontend/`:
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+If not provided, the app defaults to `http://localhost:5000`.
+
+## Local Development
+
+From `frontend/`:
+
+```bash
+npm install
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Preview production build:
+
+```bash
+npm run preview
+```
+
+## Backend Contract (Used by Frontend)
+
+Auth endpoints:
+
+- `POST /auth/register`
+- `POST /auth/login`
+
+Movie endpoints (Bearer token required):
+
+- `GET /movies`
+- `GET /movies/:id`
+- `POST /movies`
+- `PUT /movies/:id`
+- `DELETE /movies/:id`
+
+## Deploy Frontend to Vercel
+
+1. Push your repository to GitHub.
+2. In Vercel, click **Add New Project** and import this repo.
+3. Set **Root Directory** to `frontend`.
+4. Framework Preset: **Vite**.
+5. Add environment variable in Vercel:
+    - `VITE_API_URL` = your deployed backend URL
+
+6. Deploy.
+
+After deploy, frontend will call your backend via `VITE_API_URL`.
