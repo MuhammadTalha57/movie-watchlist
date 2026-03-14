@@ -22,11 +22,22 @@ const configureDnsForSrv = () => {
         return;
     }
 
-    const dnsServers = process.env.DNS_SERVERS?.split(",") || [
-        "8.8.8.8",
-        "1.1.1.1",
-    ];
-    dns.setServers(dnsServers.map((server) => server.trim()));
+    const rawDnsServers = process.env.DNS_SERVERS?.trim();
+
+    if (!rawDnsServers) {
+        cache.dnsConfigured = true;
+        return;
+    }
+
+    const dnsServers = rawDnsServers
+        .split(",")
+        .map((server) => server.trim())
+        .filter(Boolean);
+
+    if (dnsServers.length > 0) {
+        dns.setServers(dnsServers);
+    }
+
     cache.dnsConfigured = true;
 };
 
@@ -40,31 +51,31 @@ export const connectToDatabase = async () => {
         return cache.conn;
     }
 
-    if (cache.conn && !isConnectionReady()) {
-        cache.conn = null;
+    if (cache.promise) {
+        await cache.promise;
+        cache.conn = mongoose.connection;
+        return cache.conn;
     }
 
-    configureDnsForSrv();
+    // configureDnsForSrv();
 
-    if (!cache.promise) {
-        cache.promise = mongoose.connect(DATABASE_URL, {
-            serverApi: {
-                version: "1",
-                strict: true,
-                deprecationErrors: true,
-            },
-            family: 4,
-            serverSelectionTimeoutMS: 10000,
-            connectTimeoutMS: 10000,
-        });
-    }
+    cache.promise = mongoose.connect(DATABASE_URL, {
+        serverApi: {
+            version: "1",
+            strict: true,
+            deprecationErrors: true,
+        },
+        family: 4,
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000,
+    });
 
     try {
         await cache.promise;
         cache.conn = mongoose.connection;
         return cache.conn;
     } catch (error) {
-        cache.promise = null;
+        cache.conn = null;
         throw error;
     } finally {
         cache.promise = null;

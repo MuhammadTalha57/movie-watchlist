@@ -8,9 +8,11 @@ import {
     updateMovie,
 } from "../controllers/movie.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
+import { ensureDatabaseConnection } from "../middlewares/db.middleware.js";
 
 const router = express.Router();
 
+router.use(ensureDatabaseConnection);
 router.use(authenticate);
 
 router.post("/", createMovie);
