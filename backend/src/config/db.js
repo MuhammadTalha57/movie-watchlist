@@ -2,6 +2,7 @@ import dns from "node:dns";
 import mongoose from "mongoose";
 
 const DATABASE_URL = process.env.DATABASE_URL;
+mongoose.set("bufferCommands", false);
 
 const globalCache = globalThis;
 if (!globalCache.mongooseCache) {
@@ -14,12 +15,17 @@ if (!globalCache.mongooseCache) {
 
 const cache = globalCache.mongooseCache;
 
+const isConnectionReady = () => mongoose.connection.readyState === 1;
+
 const configureDnsForSrv = () => {
     if (cache.dnsConfigured || !DATABASE_URL?.startsWith("mongodb+srv://")) {
         return;
     }
 
-    const dnsServers = process.env.DNS_SERVERS?.split(",") || ["8.8.8.8", "1.1.1.1"];
+    const dnsServers = process.env.DNS_SERVERS?.split(",") || [
+        "8.8.8.8",
+        "1.1.1.1",
+    ];
     dns.setServers(dnsServers.map((server) => server.trim()));
     cache.dnsConfigured = true;
 };
@@ -29,8 +35,13 @@ export const connectToDatabase = async () => {
         throw new Error("DATABASE_URL is missing in environment variables");
     }
 
-    if (cache.conn) {
+    if (isConnectionReady()) {
+        cache.conn = mongoose.connection;
         return cache.conn;
+    }
+
+    if (cache.conn && !isConnectionReady()) {
+        cache.conn = null;
     }
 
     configureDnsForSrv();
@@ -43,14 +54,19 @@ export const connectToDatabase = async () => {
                 deprecationErrors: true,
             },
             family: 4,
+            serverSelectionTimeoutMS: 10000,
+            connectTimeoutMS: 10000,
         });
     }
 
     try {
-        cache.conn = await cache.promise;
+        await cache.promise;
+        cache.conn = mongoose.connection;
         return cache.conn;
     } catch (error) {
         cache.promise = null;
         throw error;
+    } finally {
+        cache.promise = null;
     }
 };
