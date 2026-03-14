@@ -29,6 +29,7 @@ export const registerUserService = async (data) => {
 };
 
 export const authenticateUserService = async (data) => {
+    console.log(data);
     try {
         const user = await User.findOne({ email: data.email });
 
