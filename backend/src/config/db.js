@@ -19,10 +19,7 @@ const configureDnsForSrv = () => {
         return;
     }
 
-    const dnsServers = process.env.DNS_SERVERS?.split(",") || [
-        "8.8.8.8",
-        "1.1.1.1",
-    ];
+    const dnsServers = process.env.DNS_SERVERS?.split(",") || ["8.8.8.8", "1.1.1.1"];
     dns.setServers(dnsServers.map((server) => server.trim()));
     cache.dnsConfigured = true;
 };
